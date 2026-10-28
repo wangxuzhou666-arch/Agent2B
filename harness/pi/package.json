@@ -1,0 +1,21 @@
+{
+  "name": "twotrack-pi-explorer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "twotrack's exploration worker: one Pi agent-core run per process, every tool call answered by the host",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "worker.mjs",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "1.2.0",
+    "@earendil-works/pi-ai": "1.2.0"
+  },
+  "overrides": {
+    "@earendil-works/pi-agent-core": "1.2.0",
+    "@earendil-works/pi-ai": "1.2.0",
+    "@earendil-works/pi-telemetry": "1.2.0"
+  }
+}

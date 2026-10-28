@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# pre-commit: refuse local data, env and Compose override files, and run the leak scanner on
+# the staged diff.
+set -u
+
+root=$(git rev-parse --show-toplevel) || exit 2
+cd "$root" || exit 2
+
+blocked=0
+while IFS= read -r -d '' f; do
+  base=${f##*/}
+  case "$base" in
+    .env.example) ;;
+    .env | .env.* | *.db | *.sqlite*)
+      echo "pre-commit: refusing to commit $f (local database or env file)" >&2
+      blocked=1
+      ;;
+    docker-compose.override.yml | docker-compose.override.yaml | compose.override.yml | compose.override.yaml)
+      echo "pre-commit: refusing to commit $f (Compose override file: it holds the model API key)" >&2
+      blocked=1
+      ;;
+  esac
+done < <(git diff --cached --name-only -z --diff-filter=ACMR)
+
+scan_rc=0
+bash "$root/scripts/leak_scan.sh" --staged || scan_rc=$?
+
+if [ "$blocked" -ne 0 ] && [ "$scan_rc" -eq 0 ]; then exit 1; fi
+exit "$scan_rc"

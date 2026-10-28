@@ -1,0 +1,21 @@
+Item Code,Description,UoM,Cost,Daily Demand,ROP,Lead Time,ABC Class,适用机型,Interchangeable With
+SKU-15001,Ball Bearing S-19,ea,245.03,1.75,28,16,A,PKR-100,
+SKU-15002,Drive Belt HD-18,ea,13.36,4.57,92,20,C,MXR-100,SKU-15014
+SKU-15003,Hydraulic Seal Kit S-83,kit,75.21,4.17,59,14,A,PRS-100,
+SKU-15004,Proximity Sensor S-83,ea,18.76,2.87,44,15,B,CNV-200,SKU-15005
+SKU-15005,Contactor M-73,ea,120.97,1.99,22,11,C,PKR-450,
+SKU-15006,Cartridge Fuse M-33,ea,132.78,3.01,109,36,B,CNV-300,
+SKU-15007,Gear Motor L-87,ea,543.26,2.72,77,28,A,FLR-450,
+SKU-15008,Air Filter Element HD-15,ea,496.02,0.99,28,28,A,FLR-300,SKU-15016
+SKU-15009,Flexible Coupling HD-18,ea,269.10,1.83,54,29,B,MXR-100,
+SKU-15010,Solenoid Valve HD-46,ea,145.05,0.49,13,26,C,CNV-450,
+SKU-15011,Limit Switch M-46,ea,7.65,1.91,27,14,B,MXR-450,
+SKU-15012,Rotary Encoder HD-80,ea,16.09,4.6,175,38,B,MXR-300,SKU-15015
+SKU-15013,Pneumatic Cylinder HD-39,ea,8.52,3.59,105,29,B,PRS-200,
+SKU-15014,Control Relay M-43,ea,16.43,3.36,24,7,B,MXR-300,
+SKU-15015,O-Ring Kit S-68,kit,362.68,3.13,85,27,C,MXR-450,
+SKU-15016,Thermocouple HD-17,ea,10.40,2.12,28,13,B,MXR-200,
+SKU-15017,Timing Pulley M-78,ea,6.65,0.73,8,10,C,FLR-100,SKU-15019
+SKU-15018,Linear Guide Block M-91,ea,14.16,0.54,11,20,C,FLR-300,
+SKU-15019,Pressure Gauge HD-71,ea,45.18,2.48,35,14,A,PRS-100,
+SKU-15020,Circuit Breaker M-76,ea,4.49,3.8,88,23,C,PKR-200,

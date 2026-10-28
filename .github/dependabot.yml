@@ -1,0 +1,44 @@
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  # the console (pnpm; Dependabot's npm ecosystem reads pnpm-lock.yaml)
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+    groups:
+      web-minor-and-patch:
+        update-types: [minor, patch]
+  # the Pi explorer worker (harness/pi): its Pi packages are pinned exactly, "overrides"
+  # included, so they move together; the ci pi job refuses an install that drifts from the pins
+  - package-ecosystem: npm
+    directory: /harness/pi
+    schedule:
+      interval: weekly
+    groups:
+      pi:
+        patterns: ["@earendil-works/*"]
+  # base images: the API image (Dockerfile) and the console image (web/Dockerfile). They share
+  # the pinned node image, so one entry and one group move them together in a single pull request
+  # instead of two that can drift apart
+  - package-ecosystem: docker
+    directories:
+      - /
+      - /web
+    schedule:
+      interval: weekly
+    groups:
+      base-images:
+        patterns: ["*"]
+  # the images docker-compose.yml names (the Ollama server of the "ollama" profile)
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly

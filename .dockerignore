@@ -1,0 +1,28 @@
+# Build context for the API image (Dockerfile at the repo root).
+# An allowlist: everything is excluded, then only what the image needs is let back in.
+# That keeps tests, docs, the console (it has its own context, web/), local virtualenvs,
+# databases and any .env file out of the build context and out of the layers.
+*
+
+!pyproject.toml
+!uv.lock
+!README.md
+!LICENSE
+!NOTICE
+!src
+!examples
+
+# The Pi explorer worker: its manifest and lockfile (the image installs its packages itself, so a
+# node_modules built on the host, for another platform, must never come in) and the worker.
+!harness/pi/package.json
+!harness/pi/package-lock.json
+!harness/pi/worker.mjs
+
+# Later patterns win: strip caches and local state that sit inside the allowed directories.
+**/__pycache__
+**/*.py[cod]
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/.env
+**/.env.*

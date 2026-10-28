@@ -1,0 +1,21 @@
+物料编码,Item Name,Unit,Unit Cost,Avg Daily Demand,Reorder Point,Lead Time (days),Criticality,Material,Dimensions,Recyclable
+SKU-25001,Corrugated Box Large,ea,17.58,246.2,739,3,B,cardboard,490x590x210,yes
+SKU-25002,Shipping Carton Medium,ea,1.22,188.7,1510,8,C,cardboard,260x450x190,yes
+SKU-25003,Divider Insert XL,pack,4.21,220.4,1984,9,B,cardboard,170x380x360,yes
+SKU-25004,Kraft Paper Roll Large,roll,0.85,134.1,403,3,B,paper,490x430x270,no
+SKU-25005,Paper Void Fill Large,case,0.08,164.8,2308,14,B,paper,190x350x170,no
+SKU-25006,Paper Bag Small,pack,0.88,128.1,2306,18,C,paper,560x460x100,yes
+SKU-25007,Stretch Film Medium,roll,0.88,294.6,1768,6,B,plastic,320x550x450,no
+SKU-25008,Poly Mailer Small,pack,3.85,126.4,1896,15,B,plastic,130x60x140,no
+SKU-25009,Bubble Wrap Roll Medium,roll,1.95,212.9,3620,17,C,plastic,350x470x640,no
+SKU-25010,Shrink Sleeve Small,roll,0.05,132.4,2648,20,B,plastic,380x520x640,no
+SKU-25011,Packing Tape Medium,roll,0.06,61.6,555,9,B,plastic,230x370x200,no
+SKU-25012,Plastic Tray XL,ea,7.41,270.8,3521,13,A,plastic,630x520x270,yes
+SKU-25013,Steel Strapping XL,coil,7.10,315.7,6630,21,C,metal,130x390x140,yes
+SKU-25014,Metal Tin Medium,ea,1.92,190.4,572,3,B,metal,160x140x350,yes
+SKU-25015,Strapping Seal Large,box,2.98,222.4,1335,6,C,metal,400x350x550,yes
+SKU-25016,Corrugated Box Medium,ea,0.26,275.1,5502,20,B,cardboard,370x330x400,yes
+SKU-25017,Shipping Carton Medium,ea,3.17,24.3,122,5,C,cardboard,370x390x560,yes
+SKU-25018,Divider Insert Large,pack,12.59,175.1,1751,10,B,cardboard,580x330x130,yes
+SKU-25019,Kraft Paper Roll Small,roll,2.79,154.6,2319,15,C,paper,90x180x470,yes
+SKU-25020,Paper Void Fill Medium,case,13.92,116.4,699,6,C,paper,140x210x610,yes

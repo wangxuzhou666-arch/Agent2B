@@ -1,0 +1,52 @@
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+.next/
+web/.next/
+web/out/
+# written by `next dev` for coding agents; regenerated on every run
+web/AGENTS.md
+
+# Env files (the example is tracked)
+.env
+.env.*
+!.env.example
+
+# Compose merges these on its own, and the docs put the model API key in one
+docker-compose.override.yml
+docker-compose.override.yaml
+compose.override.yml
+compose.override.yaml
+
+# Data
+*.db
+*.sqlite
+*.sqlite3
+# runtime data dir only; examples/data/ holds tracked sample CSVs
+/data/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Local AI tooling
+.claude/
+
+# Coverage / test outputs
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+coverage.xml
+playwright-report/
+test-results/

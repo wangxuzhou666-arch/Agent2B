@@ -1,0 +1,418 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Design system: docs/DESIGN.md (tokens, type scale, motion). Values are the spec's, not ad hoc. */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-ui);
+  --font-heading: var(--font-ui);
+  --font-serif: var(--font-display);
+  --font-mono: var(--font-code);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-faint: var(--faint);
+  --color-faint-foreground: var(--faint-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* type tokens (rem only; the root font-size is the scale knob) */
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.4;
+  --text-nav: 0.9375rem;
+  --text-answer: 1.0625rem;
+  --text-page-label: 1.1875rem;
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root {
+  --font-size: 16px;
+  /* One web font: layout.tsx sets --font-libre-baskerville on <html> (Latin only, with its
+     metric-matched fallback face). Everything else is a system font. Each stack lists its Latin
+     families first, so English, and the digits and Latin words inside Chinese text, keep one
+     design in both languages; the CJK families after them only supply the glyphs the Latin ones
+     lack. A CJK family placed first would set English in its own Latin glyphs instead. */
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-display: var(--font-libre-baskerville), Georgia, "Songti SC", STSong, SimSun,
+    "Noto Serif CJK SC", serif;
+  --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --background: #fafafa;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #2f6bed;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f0f0;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f0f0f0;
+  --muted-foreground: #5c5c5c;
+  --faint: #6a6a6a;
+  --faint-foreground: #6a6a6a;
+  --accent: #e8effc;
+  --accent-foreground: #2a5fd4;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --info: #2f6bed;
+  --info-foreground: #ffffff;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --input-background: #ffffff;
+  --switch-background: #d4d4d4;
+  --ring: #2f6bed;
+  --chart-1: #2f6bed;
+  --chart-2: #6f9bf2;
+  --chart-3: #38a3d1;
+  --chart-4: #737373;
+  --chart-5: #b4b4b4;
+  --radius: 0.75rem;
+  --sidebar: #f7f7f7;
+  --sidebar-foreground: #5c5c5c;
+  --sidebar-primary: #2f6bed;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ebebeb;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #2f6bed;
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ai-glow-a: #4facfe;
+  --ai-glow-b: #00f2fe;
+  --ai-glow-grad: linear-gradient(130deg, var(--ai-glow-a), var(--ai-glow-b));
+
+  /* z-index scale (DESIGN 5.4, formalized) */
+  --z-sidebar: 20;
+  --z-header: 20;
+  --z-split: 30;
+  --z-panel: 40;
+  --z-overlay: 50;
+}
+
+.dark {
+  --background: #1a1a1a;
+  --foreground: #ebebeb;
+  --card: #242424;
+  --card-foreground: #ebebeb;
+  --popover: #242424;
+  --popover-foreground: #ebebeb;
+  --primary: #5b8cf5;
+  --primary-foreground: #12151b;
+  --secondary: #2e2e2e;
+  --secondary-foreground: #ebebeb;
+  --muted: #2e2e2e;
+  --muted-foreground: #a3a3a3;
+  --faint: #999999;
+  --faint-foreground: #999999;
+  --accent: #23324e;
+  --accent-foreground: #9db8f5;
+  --destructive: #f0616d;
+  --destructive-foreground: #1a1a1a;
+  --success: #46b877;
+  --success-foreground: #12151b;
+  --warning: #d99a4e;
+  --warning-foreground: #12151b;
+  --info: #5b8cf5;
+  --info-foreground: #12151b;
+  --border: #333333;
+  --input: #383838;
+  --input-background: #242424;
+  --switch-background: #383838;
+  --ring: #5b8cf5;
+  --chart-1: #5b8cf5;
+  --chart-2: #7fa8f5;
+  --chart-3: #56b4dd;
+  --chart-4: #a3a3a3;
+  --chart-5: #6b6b6b;
+  --sidebar: #1f1f1f;
+  --sidebar-foreground: #a3a3a3;
+  --sidebar-primary: #5b8cf5;
+  --sidebar-primary-foreground: #12151b;
+  --sidebar-accent: #2e2e2e;
+  --sidebar-accent-foreground: #ebebeb;
+  --sidebar-border: #333333;
+  --sidebar-ring: #5b8cf5;
+  color-scheme: dark;
+}
+
+@utility z-sidebar {
+  z-index: var(--z-sidebar);
+}
+@utility z-header {
+  z-index: var(--z-header);
+}
+@utility z-panel {
+  z-index: var(--z-panel);
+}
+@utility z-overlay {
+  z-index: var(--z-overlay);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    font-size: var(--font-size);
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"] {
+    @apply bg-input-background;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+  /* Coarse pointers get 44px targets on chips, row actions and nav items (DESIGN 8). */
+  @media (pointer: coarse) {
+    [data-touch-target] {
+      min-height: 44px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    ::view-transition-old(*),
+    ::view-transition-new(*),
+    ::view-transition-group(*) {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0s !important;
+    }
+  }
+}
+
+@keyframes ai-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes ai-exit {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+@keyframes ai-breathe {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.22;
+  }
+}
+@keyframes ai-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0) scale(0.85);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1);
+  }
+}
+
+@layer components {
+  .ai-enter {
+    animation: ai-float-in 200ms var(--ease-standard) both;
+  }
+  .ai-exit {
+    animation: ai-exit 150ms var(--ease-standard) both;
+  }
+
+  .ai-glow {
+    position: relative;
+  }
+  .ai-glow::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--ai-glow-grad);
+    filter: blur(24px);
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity;
+    transition: opacity 150ms var(--ease-standard);
+  }
+  .ai-glow[data-active]::before {
+    opacity: 0.15;
+    transition-duration: 200ms;
+    animation: ai-breathe 2.6s var(--ease-standard) 200ms infinite;
+  }
+
+  .ai-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .ai-dots > i {
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.3;
+    animation: ai-dot 1.2s var(--ease-standard) infinite;
+  }
+  .ai-dots > i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .ai-dots > i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .report-prose {
+    @apply text-sm leading-relaxed text-foreground;
+  }
+  .report-prose > :first-child {
+    @apply mt-0;
+  }
+  .report-prose > :last-child {
+    @apply mb-0;
+  }
+  .report-prose h1 {
+    @apply mt-0 mb-3 font-serif text-lg font-semibold;
+  }
+  .report-prose h2 {
+    @apply mt-8 mb-2 text-base font-semibold;
+  }
+  .report-prose h2:first-child {
+    @apply mt-0;
+  }
+  .report-prose h3 {
+    @apply mt-5 mb-1.5 text-sm font-semibold;
+  }
+  .report-prose p {
+    @apply my-3 text-muted-foreground;
+  }
+  .report-prose ul {
+    @apply my-3 list-disc space-y-2 pl-4 marker:text-faint;
+  }
+  .report-prose ol {
+    @apply my-3 list-decimal space-y-3 pl-6 marker:font-semibold marker:text-muted-foreground marker:tabular-nums;
+  }
+  .report-prose li {
+    @apply leading-relaxed text-muted-foreground;
+  }
+  .report-prose strong {
+    @apply font-semibold text-foreground;
+  }
+  .report-prose a {
+    @apply text-primary underline underline-offset-2 hover:text-foreground;
+  }
+  .report-prose hr {
+    @apply my-4 border-border;
+  }
+  .report-prose code {
+    @apply rounded bg-muted px-1 py-0.5 font-mono text-xs;
+  }
+  .report-prose pre {
+    @apply my-3 overflow-x-auto rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-xs;
+  }
+  .report-prose pre code {
+    @apply bg-transparent p-0;
+  }
+  .report-prose blockquote {
+    @apply my-5 rounded-xl border-l-0 bg-accent/60 px-4 py-3 font-medium text-foreground ring-1 ring-primary/15;
+  }
+  .report-prose table {
+    @apply my-3 w-full border-separate border-spacing-0 overflow-hidden rounded-xl tabular-nums ring-1 ring-border;
+  }
+  .report-prose th {
+    @apply border-b border-border bg-muted/40 px-3 py-2 text-left font-medium text-muted-foreground;
+  }
+  .report-prose td {
+    @apply border-b border-border/60 px-3 py-2 text-foreground/90;
+  }
+  .report-prose tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .answer-prose {
+    @apply text-answer font-semibold;
+  }
+  .answer-prose p,
+  .answer-prose li {
+    @apply font-semibold text-foreground;
+  }
+  .answer-prose h2 {
+    @apply text-xl;
+  }
+  .answer-prose h3 {
+    @apply text-lg;
+  }
+}

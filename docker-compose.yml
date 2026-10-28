@@ -1,0 +1,299 @@
+# twotrack: the API and the console, with no API key.
+#
+#   docker compose up -d --build        (or: make up)
+#   -> console  http://localhost:3000   (demo mode: pick Admin, Operator or Viewer; no password)
+#   -> API      http://localhost:8000
+#
+# What you get: demo mode, synthetic data seeded on the first start, the built-in mock model
+# provider, and the cold-chain example plugin (examples/plugins/cold_chain.py) loaded so you can
+# see a drop-in item category without writing code. A question that no report covers runs in the
+# real Pi agent loop (see OPEN-ENDED QUESTIONS below), still with no key; `make smoke` checks it.
+#
+# SECURITY. Demo mode lets anyone who can reach the API sign in as an admin without a password.
+# Both ports are therefore published on 127.0.0.1 only. Do not change that to 0.0.0.0 or a LAN
+# address. To serve other people, turn demo mode off (remove TWOTRACK_DEMO_MODE), create
+# accounts with `docker compose run --rm api users add NAME --role admin`, and put the stack
+# behind an authenticating TLS proxy. The API warns at start-up that it is bound to 0.0.0.0:
+# that is the container's own address, and the published port above is what bounds exposure.
+#
+# OPEN-ENDED QUESTIONS. TWOTRACK_ALLOW_OPEN_TASK=1 and TWOTRACK_EXPLORER=pi are fixed on `api`
+# (they are not read from your shell). A question that matches no report is planned by Pi's agent
+# loop in a Node worker, one process per question. The worker can call only the tools the asker
+# may reach, each call goes through the same pipeline as any other (authorization, validation,
+# audit), and a write waits for a person's approval. Without a model there is nothing to plan:
+# the mock answers that no model is configured, and the trace shows runtime pi and model mock.
+# The one exception is the documented exploration case (docs/EVIDENCE.md), for which the mock
+# follows a fixed script: a few reads, then an order proposal that waits for approval.
+# With a model configured (see LOCAL MODEL) the worker talks to that endpoint instead. The API
+# image carries Node and the pinned worker (harness/pi), so nothing here needs the host.
+#
+# What holds the worker in. Node runs it with `--permission` and read access to its own install
+# only: no file writes, no child processes. The container's root file system is read-only; the
+# worker's working directory and HOME are a fresh directory in the /tmp tmpfs, which the API
+# creates for each question and deletes after it. Node's permission model does not cover the
+# network, and this stack does not restrict the container's outbound traffic: that needs
+# a firewall or proxy outside this file.
+#
+# Settings (all optional; put them in a .env file next to this one, see .env.example):
+#   API_PORT, WEB_PORT   host ports, default 8000 and 3000. API_PORT is baked into the console
+#                        build (it is the URL the browser calls), so after changing it run
+#                        `docker compose up -d --build` again.
+#   OLLAMA_MODEL         model for the "ollama" profile, default qwen2.5:0.5b.
+#   TWOTRACK_LLM_TIMEOUT_SECONDS, TWOTRACK_LLM_ROUTE_TIMEOUT_SECONDS
+#                        how long the API waits for a model to answer (default here 120) and to
+#                        give its routing opinion (default here 90). See LOCAL MODEL below.
+#   TWOTRACK_LLM_TEMPERATURE
+#                        unset: each call's own; a number from 0 to 2: that value for every
+#                        call; "omit": none.
+#                        Some models reject a non-default temperature; set TWOTRACK_LLM_TEMPERATURE=omit to leave it out of requests.
+#   TWOTRACK_EXPLORE_MAX_TURNS, TWOTRACK_EXPLORE_MAX_CALLS
+#                        what one open-ended question may spend: model turns and tool calls the
+#                        model asks for. Unset: the API's own defaults (4 and 6).
+#   TWOTRACK_EXPLORE_TIMEOUT_SECONDS, TWOTRACK_EXPLORE_TOOL_TIMEOUT_SECONDS
+#                        the wall clock of one such question, and how long the worker waits for
+#                        the API to answer one of its tool calls. Unset: 120 and 30. Raise the
+#                        first if a model on the CPU (see LOCAL MODEL) does not finish in time.
+#   TWOTRACK_EXPLORE_TOOLS
+#                        the tools and workflows such a question may offer the model, comma-
+#                        separated. Unset: every explorable one except external ones. A name
+#                        that is not an explorable tool or workflow stops the API at start-up.
+#   TWOTRACK_EXPLORE_STARTUP_TIMEOUT_SECONDS
+#                        how long the worker may take to start (until its hello); the question's
+#                        wall clock starts after that. Unset: 20.
+#
+# LOCAL MODEL (Ollama). Compose profiles only add services; they cannot change the settings of
+# a service that is always on. So the "ollama" profile starts the model server and pulls the
+# model, and one variable points the API at it:
+#
+#   TWOTRACK_PROVIDER=openai_compat docker compose --profile ollama up -d --build
+#   (or: make up-ollama)
+#
+# Without that variable the pull step exits with instructions (`docker compose logs ollama-pull`);
+# Compose only warns about it and the API stays on the mock provider. Check which provider is
+# live: curl http://localhost:8000/api/health (provider.mock is false once a real model is in
+# use). The first start downloads the model; `docker compose logs -f ollama-pull` shows the
+# progress.
+#
+# The model runs on the CPU here, far slower than a hosted one. When a model call outlasts its
+# timeout the question is still answered, but without the model: rule routing and the template
+# narration. The API's own timeouts (30 s to answer, 10 s for the routing opinion) are too short
+# for that: the routing call reads the whole capability list, a long prompt for a model on a CPU.
+# So this file sets 120 s and 90 s. TWOTRACK_LLM_TIMEOUT_SECONDS and
+# TWOTRACK_LLM_ROUTE_TIMEOUT_SECONDS (shell or .env) change them: lower for a fast endpoint,
+# higher for a bigger OLLAMA_MODEL (cost grows with size).
+#
+# Other model endpoints (no profile needed): set TWOTRACK_PROVIDER=openai_compat together with
+# TWOTRACK_LLM_BASE_URL and TWOTRACK_LLM_MODEL. On a Mac, Ollama running natively on the host
+# is much faster than the container (it can use the GPU): TWOTRACK_LLM_BASE_URL=
+# http://host.docker.internal:11434/v1. This file passes no API key through; an endpoint that
+# needs one belongs in a docker-compose.override.yml that sets TWOTRACK_LLM_API_KEY on `api`.
+#
+# Your own plugins: mount a directory and add it to the plugin path on `api`, for example
+#   volumes:     - ./my_plugins:/plugins:ro
+#   environment: TWOTRACK_PLUGIN_PATHS: /app/examples/plugins:/plugins
+#
+# Reset: `docker compose --profile '*' down -v` also deletes the data and model volumes.
+
+name: twotrack
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      TWOTRACK_DEMO_MODE: "1"
+      TWOTRACK_PLUGIN_PATHS: /app/examples/plugins
+      # The console is a different origin from the API (another port), and both spellings of the
+      # loopback address are in use, so both are allowed.
+      TWOTRACK_CORS_ORIGINS: http://localhost:${WEB_PORT:-3000},http://127.0.0.1:${WEB_PORT:-3000}
+      # Demo mode answers only to localhost, 127.0.0.1 and [::1] (any port): a request whose Host
+      # header is any other name is refused, which stops a web page that points its own name at
+      # 127.0.0.1 from signing in as an admin. Add a name you reach the API by (a proxy's host
+      # name, say) in .env. Empty when unset, which the API reads as unset.
+      TWOTRACK_ALLOWED_HOSTS: ${TWOTRACK_ALLOWED_HOSTS:-}
+      # Open-ended questions run in Pi's agent loop, in the Node worker the image carries (see
+      # OPEN-ENDED QUESTIONS in the header). Fixed here, not read from your shell, so the stack
+      # does the same thing wherever it runs. The worker's directory is set by the image.
+      TWOTRACK_ALLOW_OPEN_TASK: "1"
+      TWOTRACK_EXPLORER: pi
+      # The budgets of one such question, the tools it may offer the model and how long the
+      # worker may take to start. Empty when unset, which the API reads as unset (its default).
+      TWOTRACK_EXPLORE_MAX_TURNS: ${TWOTRACK_EXPLORE_MAX_TURNS:-}
+      TWOTRACK_EXPLORE_MAX_CALLS: ${TWOTRACK_EXPLORE_MAX_CALLS:-}
+      TWOTRACK_EXPLORE_TIMEOUT_SECONDS: ${TWOTRACK_EXPLORE_TIMEOUT_SECONDS:-}
+      TWOTRACK_EXPLORE_TOOL_TIMEOUT_SECONDS: ${TWOTRACK_EXPLORE_TOOL_TIMEOUT_SECONDS:-}
+      TWOTRACK_EXPLORE_TOOLS: ${TWOTRACK_EXPLORE_TOOLS:-}
+      TWOTRACK_EXPLORE_STARTUP_TIMEOUT_SECONDS: ${TWOTRACK_EXPLORE_STARTUP_TIMEOUT_SECONDS:-}
+      # Model provider: the mock unless TWOTRACK_PROVIDER=openai_compat is set (see the header).
+      # The endpoint and model default to the bundled Ollama and are unused by the mock.
+      TWOTRACK_PROVIDER: ${TWOTRACK_PROVIDER:-mock}
+      TWOTRACK_LLM_BASE_URL: ${TWOTRACK_LLM_BASE_URL:-http://ollama:11434/v1}
+      TWOTRACK_LLM_MODEL: ${TWOTRACK_LLM_MODEL:-${OLLAMA_MODEL:-qwen2.5:0.5b}}
+      # Seconds the API waits for a model: for an answer, and for its routing opinion. Sized for
+      # the bundled Ollama on the CPU (the API's own defaults are 30 and 10); unused by the mock.
+      TWOTRACK_LLM_TIMEOUT_SECONDS: ${TWOTRACK_LLM_TIMEOUT_SECONDS:-120}
+      TWOTRACK_LLM_ROUTE_TIMEOUT_SECONDS: ${TWOTRACK_LLM_ROUTE_TIMEOUT_SECONDS:-90}
+      # Empty when unset, which the API reads as unset: each call keeps its own temperature.
+      TWOTRACK_LLM_TEMPERATURE: ${TWOTRACK_LLM_TEMPERATURE:-}
+    volumes:
+      - data:/data
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    extra_hosts:
+      # Lets TWOTRACK_LLM_BASE_URL reach a model server on the host on Linux too (Docker Desktop
+      # defines this name itself).
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      # Only with the "ollama" profile: start once the model is available. With the profile off
+      # the service does not exist and `required: false` makes Compose skip the dependency.
+      ollama-pull:
+        condition: service_completed_successfully
+        required: false
+    healthcheck:
+      # The image has no curl; urlopen raises on a non-2xx answer, which fails the check.
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      start_interval: 2s
+    # The root file system is read-only. Writable: the /data volume, and this tmpfs, where each
+    # open-ended question gets a new empty directory as the Pi worker's cwd and HOME (the worker
+    # itself writes nothing, so the size is a ceiling, not a need).
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    # Limits, so that a runaway question or a flood of them stops at the container and not at the
+    # host. Each open-ended question that is running adds one Node worker next to the API process,
+    # and the worker's threads count against the pids limit. The limits leave headroom for several
+    # questions at once: 1g for their memory, 256 pids for their workers and the API's own thread
+    # pool. A flood past that hits the memory limit and the container is restarted (`restart`
+    # above), instead of the host swapping. The /tmp tmpfs above counts against the memory limit
+    # too. Raise both together for more questions at once, or if you raise the exploration budgets;
+    # if `make smoke` starts to fail with a worker that is not up in time, look here first.
+    mem_limit: 1g
+    pids_limit: 256
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging: *logging
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        # Baked into the browser bundle and the CSP connect-src at build time: the URL the browser
+        # uses, i.e. the published API port, not the container name.
+        NEXT_PUBLIC_API_BASE: http://localhost:${API_PORT:-8000}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/login').then((r) => process.exit(r.status < 500 ? 0 : 1), () => process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+      start_interval: 2s
+    # Read-only like `api`. The image is a standalone build: `node server.js` with the config
+    # already baked in, so nothing is compiled at start-up and a running console writes no file.
+    # The one place Next writes is .next/cache (image optimizer, fetch and ISR caches), which
+    # this console does not use; it is a small tmpfs so a request that reaches one still works.
+    # uid/gid 1000 is the image's `node` user; a tmpfs is root-owned unless told otherwise.
+    read_only: true
+    tmpfs:
+      - /app/.next/cache:rw,noexec,nosuid,size=64m,uid=1000,gid=1000
+    # Limits, for the same reason as on `api`. The console is one `node server.js` of a standalone
+    # build, with a small footprint and few threads. 256m leaves room for rendering and the cache
+    # tmpfs above (which counts against it); 128 pids leave ample headroom.
+    mem_limit: 256m
+    pids_limit: 128
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging: *logging
+
+  # ---- profile "ollama": a local model server -------------------------------------------------
+  ollama:
+    profiles: ["ollama"]
+    image: ollama/ollama:0.40.11@sha256:dea72d1e22270fe095b68fdf756d2b489d615643c5a2eaebbc5f569181e322d8
+    restart: unless-stopped
+    volumes:
+      - ollama:/root/.ollama
+    # Not published on the host: only `api` talks to it. To use it from the host as well, add
+    #   ports: ["127.0.0.1:11434:11434"]
+    # For an NVIDIA GPU on Linux, add a `deploy.resources.reservations.devices` entry.
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+      start_interval: 1s
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging: *logging
+
+  # One-shot: make sure the model is there, then exit. `api` waits for it.
+  ollama-pull:
+    profiles: ["ollama"]
+    image: ollama/ollama:0.40.11@sha256:dea72d1e22270fe095b68fdf756d2b489d615643c5a2eaebbc5f569181e322d8
+    restart: "no"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:0.5b}
+      TWOTRACK_PROVIDER: ${TWOTRACK_PROVIDER:-mock}
+    entrypoint: ["/bin/sh", "-c"]
+    # `$$` is a literal `$` for the shell; Compose would otherwise interpolate it.
+    command:
+      - |
+        if [ "$$TWOTRACK_PROVIDER" != openai_compat ]; then
+          echo "The ollama profile only starts the model server; it does not switch the API to it." >&2
+          echo "Start the stack with:  TWOTRACK_PROVIDER=openai_compat docker compose --profile ollama up -d" >&2
+          echo "or:                    make up-ollama" >&2
+          exit 1
+        fi
+        # Skip the pull when the model is already on the volume, so a restart works offline.
+        if ollama show "$$OLLAMA_MODEL" >/dev/null 2>&1; then
+          echo "model $$OLLAMA_MODEL is already present"
+        else
+          ollama pull "$$OLLAMA_MODEL"
+        fi
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging: *logging
+
+volumes:
+  # SQLite database and the generated signing secret.
+  data:
+  # Downloaded models.
+  ollama:

@@ -1,0 +1,56 @@
+[project]
+name = "twotrack"
+dynamic = ["version"]
+description = "Supply-chain agent console: LLMs route and narrate; code computes."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic>=2.7",
+    "langgraph",
+    "httpx",
+    "openai",
+    "python-multipart",
+    "pyjwt",
+    "openpyxl>=3.1.5",
+    "mcp>=2.3.0,<3",
+]
+
+[project.scripts]
+twotrack = "twotrack.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/twotrack/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/twotrack"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI declares dependencies and parameters as default values
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Path", "fastapi.File"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

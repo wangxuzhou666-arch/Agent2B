@@ -1,0 +1,4 @@
+# Benchmark outputs stay local; only this file and the README are tracked.
+*
+!.gitignore
+!README.md

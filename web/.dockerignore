@@ -1,0 +1,22 @@
+# Build context for the console image (web/Dockerfile).
+# Source, tests and config stay in: `next build` type-checks everything tsconfig.json includes,
+# and the src/**/*.test.tsx files import helpers from test/, so the image build sees exactly
+# what `pnpm build` sees in CI. Only generated output and local state are left out.
+
+node_modules
+.next
+out
+coverage
+test-results
+playwright-report
+*.tsbuildinfo
+# written by `next build` and `next dev`
+next-env.d.ts
+AGENTS.md
+
+# NEXT_PUBLIC_API_BASE is a build argument here; a stray .env must not override it.
+.env
+.env.*
+
+Dockerfile
+.dockerignore

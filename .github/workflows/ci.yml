@@ -1,0 +1,190 @@
+name: ci
+
+# Every action is pinned to a full commit SHA, with its release as the trailing comment, so a
+# moved tag cannot change what runs. Dependabot (github-actions, .github/dependabot.yml) moves
+# the SHA and the comment together.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      # every supported interpreter reports, so one failing version does not hide the others
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    env:
+      # uv fetches the interpreter if the runner lacks it
+      UV_PYTHON: ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # setup-uv publishes no floating major tag, so this one is pinned to an exact release.
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      # without Node and harness/pi installed, the `pi` tests skip here; the pi job runs them
+      - run: uv run pytest
+
+  pi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # setup-uv publishes no floating major tag, so this one is pinned to an exact release.
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      # the Pi explorer worker: Node 22.19 or newer, the lockfile's exact tree, no install scripts
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: harness/pi/package-lock.json
+      - run: npm ci --ignore-scripts
+        working-directory: harness/pi
+      # the tests that run the real worker; a worker that cannot run fails them, never skips them
+      - run: uv run pytest -m pi
+        env:
+          TWOTRACK_REQUIRE_PI: "1"
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # pnpm version comes from web/package.json "packageManager"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm check:api
+      - run: pnpm test
+      - run: pnpm build
+
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # setup-uv publishes no floating major tag, so this one is pinned to an exact release.
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      # pnpm version comes from web/package.json "packageManager"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - run: pnpm exec playwright install --with-deps chromium
+        working-directory: web
+      # the Pi worker the exploration specs run: the lockfile's exact tree, no install scripts. Without
+      # it the API of that suite refuses to start, which fails the job; the specs never skip.
+      - run: npm ci --ignore-scripts
+        working-directory: harness/pi
+      # the fixed flows, then the exploration case (pnpm e2e:fixed, pnpm e2e:explore): each starts its
+      # API (demo mode, temp data dir, cold-chain plugin) and a production build of the console.
+      # Both run even when the first fails, and the step fails if either did.
+      - run: pnpm e2e
+        working-directory: web
+      # what a failed spec leaves (trace, screenshot), one folder per suite; only when the job failed
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-test-results
+          path: web/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Both images, built the way docker-compose.yml builds them; nothing is pushed. The console's
+      # standalone output (NEXT_OUTPUT=standalone) is only produced inside web/Dockerfile, so this
+      # is the one job that builds it. The API image installs the Pi worker (harness/pi) too.
+      - run: docker compose build
+      # Guards for two image fixes that nothing else would notice if they came undone, run on the
+      # images just built. Console: web/next.config.ts keeps sharp (an optional dependency of Next)
+      # and the LGPL libvips it bundles out of the standalone output; the whole image is listed and
+      # searched, and the two dangling `sharp` symlinks that pnpm leaves in its store (they point
+      # at nothing) are skipped. API: the Dockerfile copies Node's LICENSE, which carries the
+      # notices of what the node binary bundles.
+      - name: The console image has no sharp, @img or libvips files
+        run: |
+          files=$(mktemp)
+          docker compose create --no-build web
+          docker export "$(docker compose ps -aq web)" | tar -tv > "$files"
+          # created only to read the image: the steps below start from no containers, as before
+          docker compose rm --force api web
+          hits=$(awk '$1 !~ /^l/ && tolower($0) ~ /sharp|libvips|@img/ { print $NF }' "$files")
+          if [ -n "$hits" ]; then
+            echo "::error::the console image contains sharp or libvips files, see web/next.config.ts"
+            echo "$hits" | sed -n '1,20p'
+            exit 1
+          fi
+      - name: The API image has Node's LICENSE
+        run: docker compose run --rm -T --no-deps --entrypoint test api -s /usr/share/licenses/node/LICENSE
+      # The API as compose runs it: explorer pi, read-only root, no key. It reports healthy only
+      # after start-up passed the fail-closed worker check (Node, the pinned install, a live hello
+      # from the worker under its restrictions).
+      - run: docker compose up -d --wait api
+      # Then the real worker, against the mock model: a fixed-flow question and an open-ended one,
+      # and the trace of the second must say runtime pi, model mock.
+      - run: make smoke
+      - if: failure()
+        run: docker compose logs api
+
+  leak:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Scan release content
+        env:
+          PRIVATE_PATTERNS: ${{ secrets.TWOTRACK_DENYLIST_RULES }}
+        run: |
+          if [ -n "$PRIVATE_PATTERNS" ]; then
+            umask 077
+            printf '%s\n' "$PRIVATE_PATTERNS" > "$RUNNER_TEMP/twotrack-denylist.txt"
+            TWOTRACK_DENYLIST="$RUNNER_TEMP/twotrack-denylist.txt" bash scripts/leak_scan.sh --all
+          else
+            echo "::notice::Private patterns unavailable; running generic rules only."
+            bash scripts/leak_scan.sh --all --generic-only
+          fi
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
