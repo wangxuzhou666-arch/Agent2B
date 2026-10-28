@@ -16,7 +16,7 @@ export function ProductMark({ className }: { className?: string }) {
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span className={cn("font-serif text-lg font-bold tracking-tight text-foreground", className)}>
-      twotrack
+      Agent2B
     </span>
   );
 }

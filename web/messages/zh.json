@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "twotrack",
+    "title": "Agent2B",
     "description": "面向供应链数据的智能体控制台。语言模型只负责路由与叙述，数字全部由代码计算。"
   },
   "common": {
@@ -99,7 +99,7 @@
     },
     "transcript": "对话记录",
     "you": "你",
-    "assistant": "twotrack",
+    "assistant": "Agent2B",
     "ranAs": "按 {target} 运行",
     "working": "正在处理",
     "answerReady": "回答已生成",

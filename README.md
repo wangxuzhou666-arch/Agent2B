@@ -57,7 +57,16 @@ Open **http://localhost:3000** and choose **Operator**. The first start builds t
 1. Ask **“How many shipments are late?”** Inspect the computed answer, source and execution trace.
 2. Ask **“Create a purchase order for 200 units of SKU-10042”**. Inspect the approval card. Nothing is written until you approve; then open Audit to see the record.
 
-![Demo: query late orders, inspect the trace, approve a purchase and view the result](docs/images/hub-demo.gif)
+[![Agent2B English walkthrough: query risk, investigate with tools, approve a draft purchase order and check its status](docs/images/agent2b-hub-demo-en.gif)](docs/images/agent2b-hub-demo-en.mp4)
+
+**[Watch or download the 44-second English demo (MP4)](docs/images/agent2b-hub-demo-en.mp4).** One Hub conversation: risk query → multi-round tool investigation → human approval → draft purchase order → status follow-up. Recorded from the actual local UI, retaining typing, submission, tool responses and approval transitions. Only idle pauses are shortened. The MP4 adds subtle chapter cues and soft sound effects. Uses synthetic data and a scripted mock model. The approved write creates a draft; it does not place an order with a supplier.
+
+<details>
+<summary>Agent2B console screenshot</summary>
+
+<img src="docs/images/agent2b-hub-en.png" alt="Agent2B console signed in as Operator">
+
+</details>
 
 The default uses a **mock model and template answers**. This exact open-ended request runs a scripted exploration case with several tool calls and a write approval; other free-form questions do not receive real-model reasoning:
 

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "twotrack",
+    "title": "Agent2B",
     "description": "Agent console for supply-chain data. Language models route and narrate; code computes."
   },
   "common": {
@@ -99,7 +99,7 @@
     },
     "transcript": "Conversation",
     "you": "You",
-    "assistant": "twotrack",
+    "assistant": "Agent2B",
     "ranAs": "Run as {target}",
     "working": "Working on it",
     "answerReady": "Answer ready",

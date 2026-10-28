@@ -57,7 +57,16 @@ git clone https://github.com/wangxuzhou666-arch/Agent2B.git && cd Agent2B && mak
 1. 问 **“哪些采购单逾期了？”**：查看代码计算的结果、来源和执行过程。
 2. 问 **“给 SKU-10042 下单 200 件”**：查看批准卡；只有点击批准才会写入，再到 Audit 查看记录。
 
-![演示：查询逾期订单、查看执行过程、批准采购并查看结果](docs/images/hub-demo.gif)
+[![Agent2B 英文演示：查询风险、多轮工具调查、批准创建草稿采购单、继续查询状态](docs/images/agent2b-hub-demo-en.gif)](docs/images/agent2b-hub-demo-en.mp4)
+
+**[观看或下载 44 秒英文演示（MP4）](docs/images/agent2b-hub-demo-en.mp4)。** 在同一个 Hub 对话里完成：查询风险 → 多轮工具调查 → 人工批准 → 创建草稿采购单 → 继续查询状态。实际界面连续录制，保留输入、提交、工具响应与批准过程，仅缩短无操作的停顿。MP4 另附轻量步骤提示与提示音。使用合成数据与预设 mock 探索脚本。批准后创建的是草稿，不会向供应商正式下单。
+
+<details>
+<summary>Agent2B 中文控制台截图</summary>
+
+<img src="docs/images/agent2b-hub-zh.png" alt="Agent2B 操作员控制台">
+
+</details>
 
 默认使用 **mock 模型和模板回答**。下列开放式请求会运行预设的探索脚本，演示多步工具调用和写入批准；其他自由提问不会获得真实模型推理。
 
