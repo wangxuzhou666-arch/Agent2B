@@ -59,7 +59,7 @@ git clone https://github.com/wangxuzhou666-arch/Agent2B.git && cd Agent2B && mak
 
 [![Agent2B 英文演示：查询风险、多轮工具调查、批准创建草稿采购单、继续查询状态](docs/images/agent2b-hub-demo-en.gif)](docs/images/agent2b-hub-demo-en.mp4)
 
-**[观看或下载 44 秒英文演示（MP4）](docs/images/agent2b-hub-demo-en.mp4)。** 在同一个 Hub 对话里完成：查询风险 → 多轮工具调查 → 人工批准 → 创建草稿采购单 → 继续查询状态。实际界面连续录制，保留输入、提交、工具响应与批准过程，仅缩短无操作的停顿。MP4 另附轻量步骤提示与提示音。使用合成数据与预设 mock 探索脚本。批准后创建的是草稿，不会向供应商正式下单。
+**[观看或下载 44 秒英文演示（MP4）](docs/images/agent2b-hub-demo-en.mp4)。** 在同一个 Hub 对话里完成：查询风险 → 多轮工具调查 → 人工批准 → 创建草稿采购单 → 继续查询状态。实际界面连续录制，保留输入、提交、工具响应与批准过程，仅缩短无操作的停顿。MP4 首帧直接展示中枢，另附轻量步骤提示与低音量的连续背景音乐。使用合成数据与预设 mock 探索脚本。批准后创建的是草稿，不会向供应商正式下单。
 
 <details>
 <summary>Agent2B 中文控制台截图</summary>

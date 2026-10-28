@@ -59,7 +59,7 @@ Open **http://localhost:3000** and choose **Operator**. The first start builds t
 
 [![Agent2B English walkthrough: query risk, investigate with tools, approve a draft purchase order and check its status](docs/images/agent2b-hub-demo-en.gif)](docs/images/agent2b-hub-demo-en.mp4)
 
-**[Watch or download the 44-second English demo (MP4)](docs/images/agent2b-hub-demo-en.mp4).** One Hub conversation: risk query → multi-round tool investigation → human approval → draft purchase order → status follow-up. Recorded from the actual local UI, retaining typing, submission, tool responses and approval transitions. Only idle pauses are shortened. The MP4 adds subtle chapter cues and soft sound effects. Uses synthetic data and a scripted mock model. The approved write creates a draft; it does not place an order with a supplier.
+**[Watch or download the 44-second English demo (MP4)](docs/images/agent2b-hub-demo-en.mp4).** One Hub conversation: risk query → multi-round tool investigation → human approval → draft purchase order → status follow-up. Recorded from the actual local UI, retaining typing, submission, tool responses and approval transitions. Only idle pauses are shortened. The MP4 opens directly on the Hub, with subtle chapter cues and quiet continuous background music. Uses synthetic data and a scripted mock model. The approved write creates a draft; it does not place an order with a supplier.
 
 <details>
 <summary>Agent2B console screenshot</summary>
