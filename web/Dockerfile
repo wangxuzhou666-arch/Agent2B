@@ -10,7 +10,7 @@
 # get the same release. Move the tag and the digest together, here and in the API image's
 # Dockerfile; `docker buildx imagetools inspect <image:tag>` prints the digest.
 
-FROM node:24.22.1-trixie-slim@sha256:43b9ba1142b8dcf33fa8f922ca1be85714adc444e0586c7cf7726daaeabc1bea AS base
+FROM node:26.12.1-trixie-slim@sha256:36793bcbb160a6a16cede1e62b93f84e26b78a972a8a4c0b879c1c12f22761ec AS base
 ENV NEXT_TELEMETRY_DISABLED=1
 # The pnpm that web/package.json pins in "packageManager". Installed with npm instead of
 # corepack so the pin does not depend on the Node image bundling corepack (Node 25+ does not).
@@ -38,7 +38,7 @@ RUN mkdir -p public \
  && pnpm build
 
 
-FROM node:24.22.1-trixie-slim@sha256:43b9ba1142b8dcf33fa8f922ca1be85714adc444e0586c7cf7726daaeabc1bea AS runtime
+FROM node:26.12.1-trixie-slim@sha256:36793bcbb160a6a16cede1e62b93f84e26b78a972a8a4c0b879c1c12f22761ec AS runtime
 
 LABEL org.opencontainers.image.title="twotrack-web" \
       org.opencontainers.image.description="twotrack console" \

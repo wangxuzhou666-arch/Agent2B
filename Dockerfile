@@ -11,11 +11,11 @@
 # the same release. Move a tag and its digest together; `docker buildx imagetools inspect
 # <image:tag>` prints the digest.
 
-FROM ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff AS uv
+FROM ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 AS uv
 
 # Node for the Pi worker, on the same release as the console image (web/Dockerfile). This stage
 # installs the worker's packages; the runtime stage also takes the `node` binary from here.
-FROM node:24.22.1-trixie-slim@sha256:43b9ba1142b8dcf33fa8f922ca1be85714adc444e0586c7cf7726daaeabc1bea AS pi
+FROM node:26.12.1-trixie-slim@sha256:36793bcbb160a6a16cede1e62b93f84e26b78a972a8a4c0b879c1c12f22761ec AS pi
 WORKDIR /app/harness/pi
 COPY harness/pi/package.json harness/pi/package-lock.json ./
 # The lockfile's exact tree, install scripts off (none is needed). Source maps and type
@@ -28,7 +28,7 @@ RUN --mount=type=cache,target=/root/.npm \
         \( -name '*.map' -o -name '*.d.ts' -o -name '*.d.mts' -o -name '*.d.cts' \) -delete
 
 
-FROM python:3.13.17-slim-trixie@sha256:d98cc29d3266e535dd9da1099688d9cb3ca4753813571e071763d17725460962 AS build
+FROM python:3.15.0-slim-trixie@sha256:f5b92f2a669a4c347044f29367f31983280b648250ca94dea66f98c53bc87e58 AS build
 COPY --from=uv /uv /uvx /bin/
 
 # Bytecode is compiled here because the runtime filesystem is read-only. UV_LINK_MODE=copy
@@ -54,7 +54,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 
 
-FROM python:3.13.17-slim-trixie@sha256:d98cc29d3266e535dd9da1099688d9cb3ca4753813571e071763d17725460962 AS runtime
+FROM python:3.15.0-slim-trixie@sha256:f5b92f2a669a4c347044f29367f31983280b648250ca94dea66f98c53bc87e58 AS runtime
 
 LABEL org.opencontainers.image.title="twotrack-api" \
       org.opencontainers.image.description="twotrack API server" \
