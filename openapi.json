@@ -3,7 +3,7 @@
   "info": {
     "title": "twotrack API",
     "description": "Supply-chain agent console API. LLMs route and narrate; code computes.\n\nEvery endpoint except `/api/health`, `/api/auth/login` and `/api/auth/demo` needs\n`Authorization: Bearer <token>`; `POST /api/auth/logout` revokes the token it is called with.\nErrors share one shape: `{\"error\": {\"code\", \"message\"}}`.\n\nLanguage. Labels and messages come in English and Chinese. `POST /api/query` follows the\nlanguage of the question. Every other endpoint that words something follows `Accept-Language`:\nwhen it asks for `zh` (or `zh-CN` ...) first the text is Chinese; anything else, and no header\nat all, gives English. Endpoints that return rows return ids and values, never labels; the\nlabels of entities and fields come from `GET /api/entities`.\n",
-    "version": "0.1.0.dev0"
+    "version": "0.1.0rc1"
   },
   "paths": {
     "/api/health": {
