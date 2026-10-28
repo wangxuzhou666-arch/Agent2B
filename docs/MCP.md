@@ -1,4 +1,4 @@
-# twotrack over MCP
+# Agent2B over MCP
 
 `twotrack mcp` serves the registry's tools and workflows to an MCP client (Claude Desktop,
 Cursor, any stdio MCP client). Calls run through the same pipeline as the console: role and

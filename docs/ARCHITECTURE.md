@@ -1,6 +1,6 @@
 # Architecture
 
-twotrack is a runnable architecture baseline for enterprise tasks, shown as a supply-chain agent
+Agent2B is a runnable architecture baseline for enterprise tasks, shown as a supply-chain agent
 console: people ask questions about inventory, purchase orders and suppliers in English or
 Chinese, and the console answers from deterministic tools, holds every write for a one-time
 approval, and traces its decisions and audits what it runs (the [Audit](#audit) section says what

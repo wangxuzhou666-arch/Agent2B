@@ -1,4 +1,4 @@
-# twotrack Console — Design System
+# Agent2B Console — Design System
 
 > This is twotrack's own console design system: the tokens, type, components and patterns the
 > web console in `web/` is built from. It values:
